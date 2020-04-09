@@ -88,27 +88,7 @@ edit_on_github_branch = 'master'
 def setup(app):
     app.add_javascript('js/ceph.js')
 
-# mocking ceph_module offered by ceph-mgr. `ceph_module` is required by
-# mgr.mgr_module
-class Dummy(object):
-    def __getattr__(self, _):
-        return lambda *args, **kwargs: None
-
-class Mock(object):
-    __all__ = []
-    def __init__(self, *args, **kwargs):
-        pass
-
-    def __call__(self, *args, **kwargs):
-        return Mock()
-
-    @classmethod
-    def __getattr__(cls, name):
-        mock = type(name, (Dummy,), {})
-        mock.__module__ = __name__
-        return mock
-
-sys.modules['ceph_module'] = Mock()
+autodoc_mock_imports = ['ceph_module']
 
 for pybind in [os.path.join(top_level, 'src/pybind'),
                os.path.join(top_level, 'src/pybind/mgr'),
