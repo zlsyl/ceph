@@ -1,3 +1,4 @@
+import shutil
 import sys
 import os
 
@@ -53,12 +54,17 @@ extensions = [
     'sphinx_autodoc_typehints',
     'sphinx.ext.graphviz',
     'sphinx.ext.todo',
-    'sphinxcontrib.ditaa',
+    'plantweb.directive',
     'breathe',
     'edit_on_github',
     'ceph_releases',
     ]
-ditaa = 'ditaa'
+ditaa = shutil.which("ditaa")
+if ditaa is not None:
+    extensions += ['sphinxcontrib.ditaa']
+else:
+    extensions += ['plantweb.directive']
+
 todo_include_todos = True
 
 top_level = os.path.dirname(
@@ -87,6 +93,10 @@ edit_on_github_branch = 'master'
 # handles edit-on-github and old version warning display
 def setup(app):
     app.add_javascript('js/ceph.js')
+    if ditaa is None:
+        # add "ditaa" as an alias of "diagram"
+        from plantweb.directive import DiagramDirective
+        app.add_directive('ditaa', DiagramDirective)
 
 if os.environ.get('READTHEDOCS') == 'True':
     exclude_patterns += ['**/api/*',
@@ -103,6 +113,9 @@ else:
     pybinds = ['pybind',
                'pybind/mgr',
                'python-common']
+    plantweb_defaults = {
+        'engine': 'ditaa'
+    }
 
 for c in pybinds:
     pybind = os.path.join(top_level, 'src', c)
