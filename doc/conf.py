@@ -88,10 +88,23 @@ edit_on_github_branch = 'master'
 def setup(app):
     app.add_javascript('js/ceph.js')
 
-autodoc_mock_imports = ['ceph_module']
+if os.environ.get('READTHEDOCS') == 'True':
+    exclude_patterns += ['**/api/*',
+                         '**/api.rst']
+    autodoc_mock_imports = ['ceph_module',
+                            'cephfs',
+                            'rados',
+                            'rbd',
+                            'ceph']
+    pybinds = ['pybind/mgr',
+               'python-common']
+else:
+    autodoc_mock_imports = ['ceph_module']
+    pybinds = ['pybind',
+               'pybind/mgr',
+               'python-common']
 
-for pybind in [os.path.join(top_level, 'src/pybind'),
-               os.path.join(top_level, 'src/pybind/mgr'),
-               os.path.join(top_level, 'src/python-common')]:
+for c in pybinds:
+    pybind = os.path.join(top_level, 'src', c)
     if pybind not in sys.path:
         sys.path.insert(0, pybind)
